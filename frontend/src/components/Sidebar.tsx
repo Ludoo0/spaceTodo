@@ -84,7 +84,7 @@ export default function Sidebar({ user, open, onNavigate }: SidebarProps) {
         <aside className={"sidebar" + (open ? " open" : "")}>
             <div className="brand">
                 <span className="brand-mark">◆</span>
-                <span>Spaces</span>
+                <span>SpaceTodo</span>
             </div>
 
             <NavLink
