@@ -27,9 +27,9 @@ Authentication is handled exclusively through **OpenID Connect (OIDC)**. SpaceTo
 ## 📸 Screenshots
 
 <!-- Add screenshots here -->
-![SpaceTodo overview](<img width="1904" height="986" alt="grafik" src="https://github.com/user-attachments/assets/9f98235e-479f-4ddf-a88d-7ad0f5b729b6" />)
+![SpaceTodo overview](docs/screenshots/overview.png))
 
-![SpaceTodo corkboard](<img width="1904" height="986" alt="grafik" src="https://github.com/user-attachments/assets/de573453-b3b9-4596-a181-ff81f8e25df1" />)
+![SpaceTodo corkboard](docs/screenshots/corkboard.png)
 <!--
 Example:
 
@@ -145,6 +145,8 @@ http://localhost:8080
 ```
 
 The port can be changed using `HTTP_PORT`.
+
+<a id="configuration"></a>
 
 ## ⚙️ Configuration
 
