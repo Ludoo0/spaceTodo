@@ -1,94 +1,378 @@
-# Spaces – persönliches Todo- & Notiz-Tool
+# SpaceTodo
 
-Ein kleines, selbst gehostetes Tool zum Organisieren mehrerer Lebensbereiche
-("Spaces"). Jeder Space hat eine Todo-Liste oben und ein Cork­board mit
-frei verschiebbaren Sticky Notes darunter. Auf der Startseite laufen alle
-Todos zusammen, die du in irgendeinem Space mit ★ als "wichtig" markiert hast.
+**SpaceTodo** is a small, self-hosted Todo & Notes app for organizing different areas of your life.
 
-Login läuft ausschließlich über OIDC (Keycloak, Authentik, Zitadel, Google
-Workspace, Azure AD, Authelia, Pocket ID, …) – es gibt kein eigenes Passwort-System.
+Create separate **Spaces** for things like work, hobbies, projects, or personal tasks. Each Space contains a Todo list and a freely arrangeable corkboard for sticky notes.
 
+The home page gives you an overview of all **important, open Todos** across your Spaces.
+
+Authentication is handled exclusively through **OpenID Connect (OIDC)**. SpaceTodo does not have its own password system.
+
+> 🚧 **Early-stage project:** SpaceTodo is currently under active development. APIs, database schemas, and configuration may change between releases.
+
+## ✨ Features
+
+* 🔐 OIDC authentication with Authorization Code + PKCE
+* 🗂️ Multiple Spaces with individual colors
+* ✅ Todo lists for each Space
+* ⭐ Mark Todos as important
+* 📌 Sticky-note corkboards
+* 🎨 Different colors for sticky notes
+* 🖱️ Drag & drop positioning of notes
+* 🏠 Home page aggregating all important, open Todos
+* 🐘 PostgreSQL for persistent data and sessions
+* 🐳 Docker Compose setup for self-hosting
+* 🔑 No local password database
+
+## 📸 Screenshots
+
+<!-- Add screenshots here -->
+![SpaceTodo overview](<img width="1904" height="986" alt="grafik" src="https://github.com/user-attachments/assets/9f98235e-479f-4ddf-a88d-7ad0f5b729b6" />)
+
+![SpaceTodo corkboard](<img width="1904" height="986" alt="grafik" src="https://github.com/user-attachments/assets/de573453-b3b9-4596-a181-ff81f8e25df1" />)
+<!--
+Example:
+
+![SpaceTodo overview](docs/screenshots/overview.png)
+
+![SpaceTodo corkboard](docs/screenshots/corkboard.png)
 <img width="1904" height="986" alt="grafik" src="https://github.com/user-attachments/assets/9f98235e-479f-4ddf-a88d-7ad0f5b729b6" />
 
 <img width="1904" height="986" alt="grafik" src="https://github.com/user-attachments/assets/de573453-b3b9-4596-a181-ff81f8e25df1" />
+-->
 
+## 🏗️ Architecture
 
-## Getting started
+SpaceTodo consists of three main components:
 
-1. `.env` anlegen:
+```text
+                    ┌─────────────────┐
+                    │     Browser     │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │      Nginx      │
+                    │  Static frontend│
+                    │   /api → backend│
+                    │  /auth → backend│
+                    └───────┬─────────┘
+                            │
+                 ┌──────────┴──────────┐
+                 ▼                     ▼
+        ┌─────────────────┐   ┌─────────────────┐
+        │ Node.js Backend │   │   PostgreSQL    │
+        │ Express/Prisma  │──▶│ Data + Sessions │
+        │     OIDC        │   └─────────────────┘
+        └────────┬────────┘
+                 │
+                 ▼
+          ┌───────────────┐
+          │  OIDC Provider│
+          │ Keycloak etc. │
+          └───────────────┘
+```
 
-   ```bash
-   cp .env.example .env
-   ```
+### Technology Stack
 
-2. `.env` ausfüllen – mindestens `POSTGRES_PASSWORD`, `SESSION_SECRET` sowie
-   die `OIDC_*`-Variablen (siehe unten).
+* **Frontend:** React + Vite
+* **Backend:** Node.js + TypeScript + Express
+* **Database:** PostgreSQL
+* **ORM:** Prisma
+* **Authentication:** OpenID Connect via `openid-client`
+* **Reverse proxy / static files:** Nginx
+* **Deployment:** Docker Compose
 
-3. Starten:
+## 🚀 Quick Start
 
-   ```bash
-   docker compose up -d --build
-   ```
+### Requirements
 
-4. App unter `http://localhost:8080` (bzw. dem in `HTTP_PORT` gesetzten Port)
-   öffnen.
+For the Docker-based setup you need:
 
-## OIDC-Provider einrichten
+* Docker
+* Docker Compose
 
-Das Backend spricht mit jedem Standard-OIDC-Provider, der Authorization Code
-Flow mit PKCE unterstützt. Wichtig ist nur die exakte Redirect-URI.
+You also need an OIDC provider, for example:
 
-Beim Provider registrierst du einen "Confidential" bzw. "Web" Client mit:
+* Keycloak
+* Authentik
+* Zitadel
+* Google Workspace
+* Microsoft Entra ID / Azure AD
+* Authelia
+* Pocket ID
+* or another standards-compliant OIDC provider
 
-- **Redirect URI**: `${FRONTEND_URL}/auth/callback`, z. B.
-  `http://localhost:8080/auth/callback`
-- **Grant Type**: Authorization Code (mit PKCE)
-- **Scopes**: `openid profile email`
+### 1. Clone the repository
 
-Beispiel für **Keycloak**:
+```bash
+git clone https://github.com/Ludoo0/spaceTodo.git
+cd spaceTodo
+```
 
-- Client anlegen unter *Clients → Create client*
-- Client-ID z. B. `spacetodo`, "Client authentication" aktivieren
-- Valid redirect URI: `http://localhost:8080/auth/callback`
-- `OIDC_ISSUER_URL` = `https://<dein-keycloak>/realms/<realm>`
-- Client Secret aus dem Tab *Credentials* in `OIDC_CLIENT_SECRET` eintragen
+### 2. Create the environment file
 
-Für **Authentik**, **Zitadel**, **Google**, **Azure AD** und **Pocket ID** gilt dasselbe
-Prinzip – lediglich `OIDC_ISSUER_URL` (muss `/.well-known/openid-configuration`
-bereitstellen), `OIDC_CLIENT_ID` und `OIDC_CLIENT_SECRET` ändern sich.
+```bash
+cp .env.example .env
+```
 
-Der allererste Login legt automatisch einen Benutzer in der Datenbank an
-(Zuordnung über die `sub`-Claim des Providers).
+Edit `.env` and configure at least:
 
-## Produktivbetrieb
+```env
+POSTGRES_PASSWORD=change-me
+SESSION_SECRET=change-me
 
-- Setze `COOKIE_SECURE=true`, sobald die App über HTTPS erreichbar ist
-  (z. B. hinter Traefik/Caddy/nginx-proxy als TLS-Terminator).
-- `FRONTEND_URL` und `OIDC_REDIRECT_URI` müssen auf die öffentliche Domain
-  zeigen, unter der die App tatsächlich läuft.
-- Datenbank-Daten liegen im Docker-Volume `db_data` – für Backups
-  `pg_dump` gegen den `db`-Container laufen lassen.
-- Beim Start des Backend-Containers wird das Datenbankschema automatisch
-  über `prisma db push` synchronisiert – kein manueller Migrationsschritt
-  nötig.
+OIDC_ISSUER_URL=https://your-oidc-provider.example.com
+OIDC_CLIENT_ID=your-client-id
+OIDC_CLIENT_SECRET=your-client-secret
 
-## Architektur
+FRONTEND_URL=http://localhost:8080
+OIDC_REDIRECT_URI=http://localhost:8080/auth/callback
+```
 
-- **frontend/** – React + Vite, wird als statische Seite über Nginx ausgeliefert
-  (Nginx reicht `/api` und `/auth` an das Backend weiter)
-- **backend/** – Node.js/TypeScript (Express), Prisma ORM, `openid-client` für OIDC
-- **db** – PostgreSQL (Daten + Session-Store)
+See [Configuration](#configuration) for all available settings.
 
-## Funktionsumfang
+### 3. Start SpaceTodo
 
-- OIDC-Login (Authorization Code + PKCE), Server-Side-Sessions in Postgres
-- Beliebig viele Spaces (Job, Hobby, …) mit Farbe
-- Todo-Liste pro Space: hinzufügen, abhaken, löschen, mit ★ priorisieren
-- Sticky-Note-Corkboard pro Space: frei positionierbar (Drag & Drop), Farben,
-  freier Text
-- Startseite mit automatisch aggregierter Liste aller priorisierten,
-  offenen Todos aus allen Spaces
+```bash
+docker compose up -d --build
+```
 
-## License
-Dieses Projekt läuft unter der **MIT License**
+The application should now be available at:
 
+```text
+http://localhost:8080
+```
+
+The port can be changed using `HTTP_PORT`.
+
+## ⚙️ Configuration
+
+SpaceTodo is configured through environment variables.
+
+| Variable             | Required   | Description                                 |
+| -------------------- | ---------- | ------------------------------------------- |
+| `POSTGRES_PASSWORD`  | Yes        | Password for the PostgreSQL database        |
+| `SESSION_SECRET`     | Yes        | Secret used to protect server-side sessions |
+| `OIDC_ISSUER_URL`    | Yes        | Base URL of your OIDC provider              |
+| `OIDC_CLIENT_ID`     | Yes        | OIDC client ID                              |
+| `OIDC_CLIENT_SECRET` | Yes        | OIDC client secret                          |
+| `OIDC_REDIRECT_URI`  | Yes        | OIDC callback URL                           |
+| `FRONTEND_URL`       | Yes        | Public URL of the application               |
+| `COOKIE_SECURE`      | Production | Set to `true` when using HTTPS              |
+| `HTTP_PORT`          | No         | Port exposed by Docker, defaults to `8080`  |
+
+Check `.env.example` for the complete and current list of supported variables.
+
+## 🔐 OIDC Setup
+
+SpaceTodo uses the **OpenID Connect Authorization Code Flow with PKCE**.
+
+Create a confidential/web client in your OIDC provider.
+
+### Client configuration
+
+Use:
+
+* **Grant type:** Authorization Code
+* **PKCE:** enabled/supported
+* **Scopes:** `openid profile email`
+* **Redirect URI:**
+
+```text
+${FRONTEND_URL}/auth/callback
+```
+
+For a local installation:
+
+```text
+http://localhost:8080/auth/callback
+```
+
+The exact redirect URI must be registered with your OIDC provider.
+
+### Keycloak example
+
+For Keycloak:
+
+1. Create a new client under **Clients → Create client**.
+2. Choose **OpenID Connect**.
+3. Enable client authentication.
+4. Configure the redirect URI:
+
+```text
+http://localhost:8080/auth/callback
+```
+
+5. Copy the generated client secret.
+6. Configure SpaceTodo:
+
+```env
+OIDC_ISSUER_URL=https://<your-keycloak>/realms/<your-realm>
+OIDC_CLIENT_ID=spacetodo
+OIDC_CLIENT_SECRET=<your-client-secret>
+OIDC_REDIRECT_URI=http://localhost:8080/auth/callback
+```
+
+Other OIDC providers work on the same principle. The provider must expose a standard OpenID Connect discovery document at:
+
+```text
+<OIDC_ISSUER_URL>/.well-known/openid-configuration
+```
+
+### User accounts
+
+SpaceTodo does not maintain passwords or its own authentication credentials.
+
+On the first successful login, a local user record is created and associated with the OIDC provider's `sub` claim.
+
+Authentication therefore remains the responsibility of your OIDC provider.
+
+## 🌐 Production Deployment
+
+SpaceTodo is designed to run behind a reverse proxy or TLS terminator such as:
+
+* Caddy
+* Traefik
+* Nginx
+* nginx-proxy
+* or another HTTPS reverse proxy
+
+For a production deployment:
+
+1. Use HTTPS.
+2. Set:
+
+```env
+COOKIE_SECURE=true
+```
+
+3. Set `FRONTEND_URL` to the public application URL.
+4. Set `OIDC_REDIRECT_URI` to the corresponding public callback URL.
+5. Register exactly that callback URL with your OIDC provider.
+6. Use a strong, randomly generated `SESSION_SECRET`.
+7. Keep Docker images and dependencies up to date.
+
+Example:
+
+```env
+FRONTEND_URL=https://spacetodo.example.com
+OIDC_REDIRECT_URI=https://spacetodo.example.com/auth/callback
+COOKIE_SECURE=true
+```
+
+### Database
+
+PostgreSQL data is stored in the local Folder `db_data`.
+
+The backend synchronizes the Prisma schema on container startup using:
+
+```bash
+prisma db push
+```
+
+No manual migration step is required for the current Docker setup.
+
+> **Important:** Back up your database before upgrading to versions that change the database schema.
+
+A PostgreSQL backup can be created with `pg_dump` against the database container.
+
+## 💻 Local Development
+
+Docker is recommended for running the complete application, but the frontend and backend can also be developed separately.
+
+### Backend
+
+```bash
+cd backend
+npm install
+npx prisma generate
+npm run dev
+```
+
+The backend expects a running PostgreSQL instance configured through `DATABASE_URL`.
+
+### Frontend
+
+In a second terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The development frontend runs on:
+
+```text
+http://localhost:5173
+```
+
+and proxies `/api` and `/auth` to the backend on port `4000`.
+
+## 📁 Project Structure
+
+```text
+.
+├── frontend/              # React + Vite application
+├── backend/               # Node.js + TypeScript API
+│   └── prisma/            # Prisma schema
+├── docker-compose.yml
+├── .env.example
+└── README.md
+```
+
+## 🔒 Security
+
+SpaceTodo is designed to be self-hosted. The operator is responsible for securing the deployment and its infrastructure.
+
+At minimum:
+
+* Run the application behind HTTPS in production.
+* Never commit `.env` or other files containing secrets.
+* Use a strong, randomly generated `SESSION_SECRET`.
+* Use a dedicated OIDC client for SpaceTodo.
+* Keep Docker images and dependencies up to date.
+* Restrict direct access to PostgreSQL.
+* Back up the database regularly.
+* Do not expose PostgreSQL directly to the public internet.
+
+If you discover a security vulnerability, please **do not open a public GitHub issue** with sensitive details.
+
+Instead, please report it privately using the process described in [`SECURITY.md`](SECURITY.md).
+
+## 🤝 Contributing
+
+Contributions are welcome!
+
+Before opening a pull request:
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Make your changes.
+4. Test the application locally.
+5. Open a pull request with a description of the changes.
+
+For larger changes, please open an issue first so the approach can be discussed before implementation.
+
+## 🗺️ Roadmap
+
+Some ideas for future versions:
+
+* [ ] Attachments for notes
+* [ ] Todo due dates
+* [ ] Todo priorities
+* [ ] Search across Spaces
+* [ ] Mobile / PWA improvements
+* [ ] Import / export
+* [ ] Public API
+* [ ] More granular OIDC configuration
+* [ ] Database migrations for production deployments
+
+Suggestions and feature requests are welcome via GitHub Issues.
+
+## 📄 License
+
+This project is licensed under the **MIT License**.
+
+See [`LICENSE`](LICENSE) for the full license text.
