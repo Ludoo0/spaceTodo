@@ -6,7 +6,7 @@ frei verschiebbaren Sticky Notes darunter. Auf der Startseite laufen alle
 Todos zusammen, die du in irgendeinem Space mit ★ als "wichtig" markiert hast.
 
 Login läuft ausschließlich über OIDC (Keycloak, Authentik, Zitadel, Google
-Workspace, Azure AD, Authelia, …) – es gibt kein eigenes Passwort-System.
+Workspace, Azure AD, Authelia, Pocket ID, …) – es gibt kein eigenes Passwort-System.
 
 ## Architektur
 
@@ -55,7 +55,7 @@ Beispiel für **Keycloak**:
 - `OIDC_ISSUER_URL` = `https://<dein-keycloak>/realms/<realm>`
 - Client Secret aus dem Tab *Credentials* in `OIDC_CLIENT_SECRET` eintragen
 
-Für **Authentik**, **Zitadel**, **Google** oder **Azure AD** gilt dasselbe
+Für **Authentik**, **Zitadel**, **Google**, **Azure AD** und **Pocket ID** gilt dasselbe
 Prinzip – lediglich `OIDC_ISSUER_URL` (muss `/.well-known/openid-configuration`
 bereitstellen), `OIDC_CLIENT_ID` und `OIDC_CLIENT_SECRET` ändern sich.
 
