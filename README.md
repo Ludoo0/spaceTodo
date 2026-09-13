@@ -13,13 +13,6 @@ Workspace, Azure AD, Authelia, Pocket ID, …) – es gibt kein eigenes Passwort
 <img width="1904" height="986" alt="grafik" src="https://github.com/user-attachments/assets/de573453-b3b9-4596-a181-ff81f8e25df1" />
 
 
-## Architektur
-
-- **frontend/** – React + Vite, wird als statische Seite über Nginx ausgeliefert
-  (Nginx reicht `/api` und `/auth` an das Backend weiter)
-- **backend/** – Node.js/TypeScript (Express), Prisma ORM, `openid-client` für OIDC
-- **db** – PostgreSQL (Daten + Session-Store)
-
 ## Getting started
 
 1. `.env` anlegen:
@@ -79,20 +72,12 @@ Der allererste Login legt automatisch einen Benutzer in der Datenbank an
   über `prisma db push` synchronisiert – kein manueller Migrationsschritt
   nötig.
 
-## Lokale Entwicklung ohne Docker
+## Architektur
 
-```bash
-# Backend
-cd backend
-npm install
-npx prisma generate
-npm run dev   # erwartet eine laufende Postgres-Instanz via DATABASE_URL
-
-# Frontend (in zweitem Terminal)
-cd frontend
-npm install
-npm run dev   # http://localhost:5173, proxyt /api und /auth auf Port 4000
-```
+- **frontend/** – React + Vite, wird als statische Seite über Nginx ausgeliefert
+  (Nginx reicht `/api` und `/auth` an das Backend weiter)
+- **backend/** – Node.js/TypeScript (Express), Prisma ORM, `openid-client` für OIDC
+- **db** – PostgreSQL (Daten + Session-Store)
 
 ## Funktionsumfang
 
@@ -103,3 +88,7 @@ npm run dev   # http://localhost:5173, proxyt /api und /auth auf Port 4000
   freier Text
 - Startseite mit automatisch aggregierter Liste aller priorisierten,
   offenen Todos aus allen Spaces
+
+## License
+Dieses Projekt läuft unter der **MIT License**
+
