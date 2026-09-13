@@ -27,7 +27,7 @@ Authentication is handled exclusively through **OpenID Connect (OIDC)**. SpaceTo
 ## 📸 Screenshots
 
 <!-- Add screenshots here -->
-![SpaceTodo overview](docs/screenshots/overview.png))
+![SpaceTodo overview](docs/screenshots/overview.png)
 
 ![SpaceTodo corkboard](docs/screenshots/corkboard.png)
 <!--
