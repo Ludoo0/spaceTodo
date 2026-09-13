@@ -62,7 +62,7 @@ SpaceTodo consists of three main components:
                  ▼                     ▼
         ┌─────────────────┐   ┌─────────────────┐
         │ Node.js Backend │   │   PostgreSQL    │
-        │ Express/Prisma  │──▶│ Data + Sessions │
+        │Express/Sequelize│──▶│ Data + Sessions │
         │     OIDC        │   └─────────────────┘
         └────────┬────────┘
                  │
@@ -78,7 +78,7 @@ SpaceTodo consists of three main components:
 * **Frontend:** React + Vite
 * **Backend:** Node.js + TypeScript + Express
 * **Database:** PostgreSQL
-* **ORM:** Prisma
+* **ORM:** Sequelize
 * **Authentication:** OpenID Connect via `openid-client`
 * **Reverse proxy / static files:** Nginx
 * **Deployment:** Docker Compose
@@ -267,13 +267,13 @@ COOKIE_SECURE=true
 
 PostgreSQL data is stored in the local Folder `db_data`.
 
-The backend synchronizes the Prisma schema on container startup using:
+The backend synchronizes the database schema on container startup using Sequelize:
 
 ```bash
-prisma db push
+sequelize.sync({ alter: true })
 ```
 
-No manual migration step is required for the current Docker setup.
+This automatically creates or updates all tables based on the model definitions.
 
 > **Important:** Back up your database before upgrading to versions that change the database schema.
 
@@ -288,7 +288,6 @@ Docker is recommended for running the complete application, but the frontend and
 ```bash
 cd backend
 npm install
-npx prisma generate
 npm run dev
 ```
 
@@ -318,7 +317,8 @@ and proxies `/api` and `/auth` to the backend on port `4000`.
 .
 ├── frontend/              # React + Vite application
 ├── backend/               # Node.js + TypeScript API
-│   └── prisma/            # Prisma schema
+│   └── src/               # Backend source code
+├── db_data/               # PostgreSQL data volume
 ├── docker-compose.yml
 ├── .env.example
 └── README.md
