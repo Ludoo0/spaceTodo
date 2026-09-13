@@ -20,9 +20,18 @@ const pgPool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
+const allowedOrigins = (process.env.FRONTEND_URL || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || true,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(null, false);
+    },
     credentials: true,
   })
 );
