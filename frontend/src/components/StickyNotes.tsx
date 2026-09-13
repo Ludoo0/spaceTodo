@@ -11,6 +11,7 @@ interface Props {
   onAdd: (color: string) => void;
   onChange: (note: Note, patch: Partial<Note>) => void;
   onRemove: (note: Note) => void;
+  onDragEnd?: (note: Note) => void;
 }
 
 function autoGrow(el: HTMLTextAreaElement | null) {
@@ -19,7 +20,7 @@ function autoGrow(el: HTMLTextAreaElement | null) {
   el.style.height = `${el.scrollHeight}px`;
 }
 
-export default function StickyNotes({ notes, layout, onLayoutChange, onAdd, onChange, onRemove }: Props) {
+export default function StickyNotes({ notes, layout, onLayoutChange, onAdd, onChange, onRemove, onDragEnd }: Props) {
   const boardRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState<string | null>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -123,7 +124,10 @@ export default function StickyNotes({ notes, layout, onLayoutChange, onAdd, onCh
                           className="sticky-note-handle"
                           onPointerDown={(e) => startDrag(e, n)}
                           onPointerMove={(e) => onDrag(e, n)}
-                          onPointerUp={() => setDragging(null)}
+                          onPointerUp={() => {
+                            setDragging(null);
+                            onDragEnd?.(n);
+                          }}
                       >
                         <button className="sticky-note-remove" onClick={() => onRemove(n)} aria-label="Notiz löschen">
                           ×

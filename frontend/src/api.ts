@@ -1,13 +1,45 @@
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+let csrfToken: string | null = null;
+
+async function fetchCsrfToken(): Promise<string> {
+  const res = await fetch("/auth/csrf-token", { credentials: "include" });
+  const body = await res.json();
+  csrfToken = body.csrfToken;
+  return csrfToken!;
+}
+
+const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+async function request<T>(path: string, options?: RequestInit, isRetry = false): Promise<T> {
+  const method = (options?.method || "GET").toUpperCase();
+  const needsCsrf = MUTATING_METHODS.has(method);
+
+  if (needsCsrf && !csrfToken) {
+    await fetchCsrfToken().catch(() => {
+      /* if this fails, the request below will fail too and surface the real error */
+    });
+  }
+
   const res = await fetch(path, {
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(needsCsrf && csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+    },
     ...options,
   });
+
   if (res.status === 401) {
     window.location.href = "/auth/login";
     throw new Error("unauthenticated");
   }
+
+  if (res.status === 403 && needsCsrf && !isRetry) {
+    // CSRF token likely stale (e.g. session renewed) - fetch a fresh one and retry once.
+    csrfToken = null;
+    await fetchCsrfToken().catch(() => {});
+    return request<T>(path, options, true);
+  }
+
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || `Anfrage fehlgeschlagen (${res.status})`);
