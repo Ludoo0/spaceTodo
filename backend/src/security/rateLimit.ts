@@ -6,7 +6,7 @@ import rateLimit from "express-rate-limit";
 // into a sticky note, which autosaves on every keystroke) don't get blocked.
 export const apiLimiter = rateLimit({
 	windowMs: 60 * 1000, // 1 minute
-	limit: 300,
+	limit: 6000,
 	standardHeaders: true,
 	legacyHeaders: false,
 	keyGenerator: (req) => req.session?.userId || req.ip || "anonymous",
