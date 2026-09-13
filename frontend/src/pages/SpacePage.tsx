@@ -4,12 +4,16 @@ import { api } from "../api";
 import type { Note, Space, Todo } from "../types";
 import TodoList from "../components/TodoList";
 import StickyNotes from "../components/StickyNotes";
+import { debounce } from "../utils/debounce";
+import { debounceManager } from "../utils/debounceManager";
 
 export default function SpacePage() {
     const { id } = useParams<{ id: string }>();
     const [space, setSpace] = useState<Space | null>(null);
     const [todos, setTodos] = useState<Todo[]>([]);
     const [notes, setNotes] = useState<Note[]>([]);
+    const [noteUpdateQueue] = useState(() => new Map<string, Partial<Note>>());
+    const [debouncedNoteUpdates] = useState(() => new Map<string, ReturnType<typeof debounce>>());
 
     const loadTodos = () => {
         if (id) api.todos.listForSpace(id).then(setTodos);
@@ -25,6 +29,39 @@ export default function SpacePage() {
         loadNotes();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
+
+    // Cleanup debounced operations on unmount
+    useEffect(() => {
+        return () => {
+            // Flush all pending note updates
+            for (const debouncedFn of debouncedNoteUpdates.values()) {
+                debouncedFn.flush();
+            }
+            debouncedNoteUpdates.clear();
+            noteUpdateQueue.clear();
+        };
+    }, [debouncedNoteUpdates, noteUpdateQueue]);
+
+    function getOrCreateDebouncedNoteUpdate(noteId: string) {
+        if (!debouncedNoteUpdates.has(noteId)) {
+            const debouncedFn = debounce(() => {
+                const patch = noteUpdateQueue.get(noteId);
+                if (patch && Object.keys(patch).length > 0) {
+                    api.notes.update(noteId, patch).catch(console.error);
+                    noteUpdateQueue.delete(noteId);
+                }
+            }, 500);
+
+            debouncedNoteUpdates.set(noteId, debouncedFn);
+
+            // Register with global manager for page unload
+            debounceManager.register({
+                id: `note-update-${noteId}`,
+                flush: () => debouncedFn.flush(),
+            });
+        }
+        return debouncedNoteUpdates.get(noteId)!;
+    }
 
     function changeLayout(layout: "grid" | "free") {
         if (!space) return;
@@ -60,8 +97,18 @@ export default function SpacePage() {
                     onLayoutChange={changeLayout}
                     onAdd={(color) => api.notes.create(id, { color }).then(loadNotes)}
                     onChange={(note, patch) => {
+                        // Update UI immediately (optimistic update)
                         setNotes((prev) => prev.map((n) => (n.id === note.id ? { ...n, ...patch } : n)));
-                        api.notes.update(note.id, patch);
+                        // Queue the patch and debounce the API call
+                        const existing = noteUpdateQueue.get(note.id) || {};
+                        noteUpdateQueue.set(note.id, { ...existing, ...patch });
+                        const debouncedUpdate = getOrCreateDebouncedNoteUpdate(note.id);
+                        debouncedUpdate();
+                    }}
+                    onDragEnd={(note) => {
+                        // Flush immediately after dragging ends for better UX
+                        const debouncedUpdate = debouncedNoteUpdates.get(note.id);
+                        debouncedUpdate?.flush();
                     }}
                     onRemove={(note) => api.notes.remove(note.id).then(loadNotes)}
                 />
