@@ -21,7 +21,6 @@ const pgPool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 
 app.set("trust proxy", 1);
 app.use(express.json());
-app.use(cookieParser());
 const allowedOrigins = (process.env.FRONTEND_URL || "")
   .split(",")
   .map((origin) => origin.trim())
