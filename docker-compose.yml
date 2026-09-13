@@ -2,6 +2,7 @@ services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
+    container_name: spacetodo-db
     environment:
       POSTGRES_USER: spacetodo
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-spacetodo}
@@ -17,6 +18,7 @@ services:
   backend:
     build: ./backend
     restart: unless-stopped
+    container_name: spacetodo-backend
     depends_on:
       db:
         condition: service_healthy
@@ -35,6 +37,7 @@ services:
   frontend:
     build: ./frontend
     restart: unless-stopped
+    container_name: spacetodo-frontend
     depends_on:
       - backend
     ports:
