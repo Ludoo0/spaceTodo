@@ -8,6 +8,11 @@ Todos zusammen, die du in irgendeinem Space mit ★ als "wichtig" markiert hast.
 Login läuft ausschließlich über OIDC (Keycloak, Authentik, Zitadel, Google
 Workspace, Azure AD, Authelia, Pocket ID, …) – es gibt kein eigenes Passwort-System.
 
+<img width="1904" height="986" alt="grafik" src="https://github.com/user-attachments/assets/9f98235e-479f-4ddf-a88d-7ad0f5b729b6" />
+
+<img width="1904" height="986" alt="grafik" src="https://github.com/user-attachments/assets/de573453-b3b9-4596-a181-ff81f8e25df1" />
+
+
 ## Architektur
 
 - **frontend/** – React + Vite, wird als statische Seite über Nginx ausgeliefert
@@ -15,7 +20,7 @@ Workspace, Azure AD, Authelia, Pocket ID, …) – es gibt kein eigenes Passwort
 - **backend/** – Node.js/TypeScript (Express), Prisma ORM, `openid-client` für OIDC
 - **db** – PostgreSQL (Daten + Session-Store)
 
-## Schnellstart
+## Getting started
 
 1. `.env` anlegen:
 
