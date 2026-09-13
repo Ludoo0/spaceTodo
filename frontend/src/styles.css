@@ -196,6 +196,14 @@ a {
   color: #fff;
 }
 
+.mobile-topbar-toggle {
+  display: none;
+}
+
+.sidebar-backdrop {
+  display: none;
+}
+
 .sidebar-footer {
   margin-top: auto;
   padding-top: 1rem;
@@ -414,62 +422,155 @@ a {
   border: 2px solid rgba(255, 255, 255, 0.25);
 }
 
-.corkboard {
-  position: relative;
-  min-height: 340px;
+.corkboard-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: #b8b2a0;
   border-radius: 4px;
   background: repeating-linear-gradient(45deg, #322f28, #322f28 2px, #2e2b25 2px, #2e2b25 4px);
 }
 
-.corkboard-empty {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 2rem;
-  color: #b8b2a0;
+.corkboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.7rem;
+  align-items: start;
 }
 
 .sticky-note {
-  position: absolute;
-  width: 180px;
-  min-height: 150px;
-  padding: 0;
+  position: relative;
   border-radius: 2px;
-  box-shadow: 3px 6px 14px rgba(0, 0, 0, 0.35);
-}
-
-.sticky-note-handle {
-  height: 18px;
-  cursor: grab;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
+  padding: 0.3rem 0.2rem 0.5rem;
   display: flex;
-  justify-content: flex-end;
-  touch-action: none;
+  flex-direction: column;
 }
 
 .sticky-note-remove {
+  align-self: flex-end;
   background: none;
   border: none;
   color: rgba(0, 0, 0, 0.35);
-  font-size: 1rem;
-  padding: 0 0.4rem;
-  line-height: 1.3;
+  font-size: 1.05rem;
+  padding: 0 0.35rem;
+  line-height: 1.2;
 }
 
 .sticky-note textarea {
   width: 100%;
-  height: 128px;
+  min-height: 90px;
   border: none;
   background: transparent;
   resize: none;
-  padding: 0 0.7rem 0.7rem;
+  overflow: hidden;
+  padding: 0 0.75rem 0.5rem;
   font-family: var(--font-body);
-  font-size: 0.9rem;
+  font-size: 0.92rem;
+  line-height: 1.4;
   color: #2c2a1f;
 }
 
 .sticky-note textarea:focus {
   outline: none;
+}
+
+/* --- responsive / mobile --- */
+
+@media (max-width: 860px) {
+  .page {
+    padding: 5.5rem 1.2rem 4rem;
+  }
+
+  .page-header h1 {
+    font-size: 2.1rem;
+  }
+
+  .corkboard-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.55rem;
+  }
+
+  .todo-space-tag {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .shell {
+    display: block;
+  }
+
+  .mobile-topbar-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3.4rem;
+    padding: 0 1rem;
+    background: var(--ink-soft);
+    color: var(--text-light);
+    border: none;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    z-index: 30;
+  }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(78vw, 300px);
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 50;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.4);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .content {
+    padding-top: 3.4rem;
+  }
+
+  .page {
+    padding: 1.75rem 1.1rem 3.5rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.85rem;
+  }
+
+  .login-card {
+    padding: 2.2rem 1.6rem;
+    margin: 0 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .corkboard-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 0.45rem;
+  }
+
+  .todo-add-row {
+    flex-direction: column;
+  }
+
+  .todo-add-row .btn {
+    align-self: flex-end;
+  }
 }

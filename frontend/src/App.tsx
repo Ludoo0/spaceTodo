@@ -8,12 +8,13 @@ import SpacePage from "./pages/SpacePage";
 
 export default function App() {
   const [user, setUser] = useState<User | null | undefined>(undefined);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     api
-      .me()
-      .then(setUser)
-      .catch(() => setUser(null));
+        .me()
+        .then(setUser)
+        .catch(() => setUser(null));
   }, []);
 
   if (user === undefined) {
@@ -22,27 +23,38 @@ export default function App() {
 
   if (user === null) {
     return (
-      <div className="login-screen">
-        <div className="login-card">
-          <h1>Spaces</h1>
-          <p>Ein ruhiger Ort für deine Todos und Notizen &mdash; sortiert nach Lebensbereich.</p>
-          <a className="btn btn-primary" href="/auth/login">
-            Anmelden
-          </a>
+        <div className="login-screen">
+          <div className="login-card">
+            <h1>Spaces</h1>
+            <p>Ein ruhiger Ort für deine Todos und Notizen &mdash; sortiert nach Lebensbereich.</p>
+            <a className="btn btn-primary" href="/auth/login">
+              Anmelden
+            </a>
+          </div>
         </div>
-      </div>
     );
   }
 
   return (
-    <div className="shell">
-      <Sidebar user={user} />
-      <main className="content">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/space/:id" element={<SpacePage />} />
-        </Routes>
-      </main>
-    </div>
+      <div className="shell">
+        <button
+            className="mobile-topbar-toggle"
+            aria-label="Menü öffnen"
+            onClick={() => setSidebarOpen(true)}
+        >
+          ☰ <span className="brand-mark">◆</span> Spaces
+        </button>
+
+        {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
+
+        <Sidebar user={user} open={sidebarOpen} onNavigate={() => setSidebarOpen(false)} />
+
+        <main className="content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/space/:id" element={<SpacePage />} />
+          </Routes>
+        </main>
+      </div>
   );
 }
