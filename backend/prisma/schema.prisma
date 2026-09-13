@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  oidcSub   String   @unique
+  email     String?
+  name      String?
+  createdAt DateTime @default(now())
+  spaces    Space[]
+}
+
+model Space {
+  id        String   @id @default(cuid())
+  name      String
+  color     String   @default("#3E7C6B")
+  icon      String   @default("folder")
+  position  Int      @default(0)
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  todos     Todo[]
+  notes     Note[]
+  createdAt DateTime @default(now())
+}
+
+model Todo {
+  id        String   @id @default(cuid())
+  title     String
+  done      Boolean  @default(false)
+  priority  Boolean  @default(false)
+  position  Int      @default(0)
+  spaceId   String
+  space     Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  content   String
+  color     String   @default("#D9A441")
+  x         Int      @default(0)
+  y         Int      @default(0)
+  rotation  Int      @default(0)
+  spaceId   String
+  space     Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
