@@ -18,16 +18,17 @@ model User {
 }
 
 model Space {
-  id        String   @id @default(cuid())
-  name      String
-  color     String   @default("#3E7C6B")
-  icon      String   @default("folder")
-  position  Int      @default(0)
-  ownerId   String
-  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  todos     Todo[]
-  notes     Note[]
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  name       String
+  color      String   @default("#3E7C6B")
+  icon       String   @default("folder")
+  position   Int      @default(0)
+  noteLayout String   @default("grid") // "grid" | "free"
+  ownerId    String
+  owner      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  todos      Todo[]
+  notes      Note[]
+  createdAt  DateTime @default(now())
 }
 
 model Todo {

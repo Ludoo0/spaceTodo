@@ -39,11 +39,12 @@ router.patch("/:id", async (req, res) => {
   const space = await loadOwnedSpace(req.session.userId!, req.params.id);
   if (!space) return res.status(404).json({ error: "Space nicht gefunden" });
 
-  const { name, color, icon, position } = req.body as {
+  const { name, color, icon, position, noteLayout } = req.body as {
     name?: string;
     color?: string;
     icon?: string;
     position?: number;
+    noteLayout?: string;
   };
   const updated = await prisma.space.update({
     where: { id: space.id },
@@ -52,6 +53,7 @@ router.patch("/:id", async (req, res) => {
       ...(color !== undefined ? { color } : {}),
       ...(icon !== undefined ? { icon } : {}),
       ...(position !== undefined ? { position } : {}),
+      ...(noteLayout !== undefined ? { noteLayout } : {}),
     },
   });
   res.json(updated);

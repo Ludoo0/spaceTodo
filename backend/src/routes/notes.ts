@@ -40,8 +40,8 @@ router.post("/space/:spaceId", async (req, res) => {
     data: {
       content: content || "",
       color: color || "#D9A441",
-      x: x ?? Math.round(Math.random() * 200),
-      y: y ?? Math.round(Math.random() * 120),
+      x: x ?? Math.round(Math.random() * 650),
+      y: y ?? Math.round(Math.random() * 240),
       rotation: rotation ?? Math.round(Math.random() * 6 - 3),
       spaceId: space.id,
     },

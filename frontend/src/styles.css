@@ -164,7 +164,97 @@ a {
 .space-list {
   display: flex;
   flex-direction: column;
+  gap: 0.1rem;
+}
+
+.space-row {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 4px;
+}
+
+.space-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.space-row .nav-item {
+  flex: 1;
+  min-width: 0;
+  padding-left: 0.3rem;
+}
+
+.space-row .nav-item.active {
+  background: transparent;
+}
+
+.space-row:hover .nav-item.active,
+.space-row .nav-item.active {
+  color: #fff;
+}
+
+.space-order-btns {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.order-btn {
+  background: none;
+  border: none;
+  color: #565d70;
+  font-size: 0.55rem;
+  line-height: 1;
+  padding: 0.1rem 0.15rem;
+}
+
+.order-btn:hover:not(:disabled) {
+  color: #c8cddb;
+}
+
+.order-btn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.space-edit-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--space-color, #3a4051);
+  background: #10131a;
+  color: #fff;
+  font-size: 0.92rem;
+}
+
+.space-row-actions {
+  display: flex;
   gap: 0.15rem;
+  flex-shrink: 0;
+  opacity: 0.55;
+}
+
+.space-row:hover .space-row-actions {
+  opacity: 1;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  color: #8b93a7;
+  font-size: 0.85rem;
+  padding: 0.25rem;
+  border-radius: 3px;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.icon-btn-danger:hover {
+  color: #e8836b;
 }
 
 .space-dot {
@@ -243,7 +333,7 @@ a {
 }
 
 .page {
-  max-width: 760px;
+  max-width: 1040px;
   margin: 0 auto;
   padding: 3.5rem 2.5rem 6rem;
 }
@@ -284,6 +374,8 @@ a {
 /* --- notepad / todos --- */
 
 .notepad {
+  max-width: 680px;
+  margin: 0 auto;
   background: #fffdf8;
   border: 1px solid var(--paper-line);
   border-radius: 6px;
@@ -399,7 +491,9 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.75rem;
   margin-bottom: 0.8rem;
+  flex-wrap: wrap;
 }
 
 .corkboard-header h2 {
@@ -408,6 +502,34 @@ a {
   font-size: 1.15rem;
   margin: 0;
   font-weight: 500;
+}
+
+.corkboard-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.layout-toggle {
+  display: flex;
+  background: #1d1c19;
+  border-radius: 20px;
+  padding: 2px;
+}
+
+.layout-toggle-btn {
+  background: none;
+  border: none;
+  color: #9a9585;
+  font-size: 0.78rem;
+  padding: 0.32rem 0.8rem;
+  border-radius: 20px;
+}
+
+.layout-toggle-btn.active {
+  background: var(--teal);
+  color: #fff;
 }
 
 .note-color-picker {
@@ -435,6 +557,46 @@ a {
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 0.7rem;
   align-items: start;
+}
+
+.corkboard-scroll {
+  overflow-x: auto;
+  border-radius: 4px;
+  margin: 0 -0.1rem;
+}
+
+.corkboard-canvas {
+  position: relative;
+  min-height: 420px;
+  border-radius: 4px;
+  background: repeating-linear-gradient(45deg, #322f28, #322f28 2px, #2e2b25 2px, #2e2b25 4px);
+}
+
+.sticky-note-free {
+  position: absolute;
+  width: 190px;
+  min-height: 150px;
+  padding: 0;
+}
+
+.sticky-note-free .sticky-note-remove {
+  align-self: auto;
+}
+
+.sticky-note-handle {
+  height: 20px;
+  cursor: grab;
+  display: flex;
+  justify-content: flex-end;
+  touch-action: none;
+}
+
+.sticky-note-handle:active {
+  cursor: grabbing;
+}
+
+.sticky-note-free textarea {
+  min-height: 128px;
 }
 
 .sticky-note {

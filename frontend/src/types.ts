@@ -10,6 +10,7 @@ export interface Space {
   color: string;
   icon: string;
   position: number;
+  noteLayout: "grid" | "free";
 }
 
 export interface Todo {
