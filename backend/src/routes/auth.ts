@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { getOidcClient, generators } from "../auth.js";
-import { prisma } from "../db.js";
+import { User } from "../db.js";
+import { v4 as uuidv4 } from "uuid";
 
 const router = Router();
 
@@ -45,17 +46,19 @@ router.get("/callback", async (req, res, next) => {
 
     const userinfo = await client.userinfo(tokenSet);
 
-    const user = await prisma.user.upsert({
-      where: { oidcSub: userinfo.sub },
-      update: {
-        email: userinfo.email ?? undefined,
-        name: (userinfo.name as string) ?? userinfo.preferred_username ?? undefined,
+    const [user] = await User.findOrCreate({
+      where: { oidcSub: userinfo.sub as string },
+      defaults: {
+        id: uuidv4(),
+        oidcSub: userinfo.sub as string,
+        email: userinfo.email as string | undefined,
+        name: ((userinfo.name as string) ?? userinfo.preferred_username) as string | undefined,
       },
-      create: {
-        oidcSub: userinfo.sub,
-        email: userinfo.email ?? undefined,
-        name: (userinfo.name as string) ?? userinfo.preferred_username ?? undefined,
-      },
+    });
+
+    await user.update({
+      email: userinfo.email as string | undefined,
+      name: ((userinfo.name as string) ?? userinfo.preferred_username) as string | undefined,
     });
 
     delete req.session.oidc;
@@ -76,7 +79,7 @@ router.post("/logout", (req, res) => {
 
 router.get("/me", async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "unauthenticated" });
-  const user = await prisma.user.findUnique({ where: { id: req.session.userId } });
+  const user = await User.findByPk(req.session.userId);
   if (!user) return res.status(401).json({ error: "unauthenticated" });
   res.json({ id: user.id, email: user.email, name: user.name });
 });
