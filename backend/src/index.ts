@@ -6,6 +6,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import pg from "pg";
 
+import { sequelize } from "./db.js";
 import authRoutes from "./routes/auth.js";
 import spaceRoutes from "./routes/spaces.js";
 import todoRoutes from "./routes/todos.js";
@@ -56,6 +57,18 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 });
 
 const port = Number(process.env.PORT) || 4000;
-app.listen(port, () => {
-  console.log(`spacetodo backend läuft auf Port ${port}`);
-});
+
+(async () => {
+  try {
+    // Sync database
+    await sequelize.sync({ alter: true });
+    console.log("Datenbank synchronisiert");
+
+    app.listen(port, () => {
+      console.log(`spacetodo backend läuft auf Port ${port}`);
+    });
+  } catch (error) {
+    console.error("Fehler beim Starten des Servers:", error);
+    process.exit(1);
+  }
+})();

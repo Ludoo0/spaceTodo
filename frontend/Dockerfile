@@ -1,8 +1,10 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm install
-COPY . .
+RUN npm ci
+COPY tsconfig.json vite.config.ts index.html ./
+COPY public ./public
+COPY src ./src
 RUN npm run build
 
 FROM nginx:1.27-alpine
