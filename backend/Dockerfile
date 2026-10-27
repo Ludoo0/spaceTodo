@@ -1,19 +1,28 @@
-FROM node:20-alpine AS build
+FROM oven/bun:1-alpine AS build
 WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci
+
+COPY package.json bun.lock ./
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+    bun install --frozen-lockfile
+
 COPY tsconfig.json ./
 COPY src ./src
-RUN npm run build
 
-FROM node:20-alpine
+RUN bun build ./src/index.ts \
+    --target=bun \
+    --outdir=dist \
+    --external pg-native \
+    --minify
+
+
+FROM oven/bun:1-alpine
 WORKDIR /app
+
 ENV NODE_ENV=production
-COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev
+
 RUN apk add --no-cache openssl
 
 COPY --from=build /app/dist ./dist
 
 EXPOSE 4000
-CMD ["node", "dist/index.js"]
+CMD ["bun", "dist/index.js"]

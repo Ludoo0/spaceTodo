@@ -1,5 +1,5 @@
 node_modules
-npm-debug.log
+bun-debug.log
 dist
 .git
 .gitignore
@@ -19,4 +19,3 @@ build
 .next
 out
 prisma
-

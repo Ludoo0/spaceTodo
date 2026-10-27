@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { api } from "../api";
-import type { Space, User } from "../types";
+import { api } from "@/api";
+import type { Space, User } from "@/types";
 
 const PALETTE = ["#3E7C6B", "#C97B4A", "#7FA8C9", "#B49CD1", "#D9A441", "#8FAE8B"];
 

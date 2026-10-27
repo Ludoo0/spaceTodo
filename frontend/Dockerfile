@@ -1,11 +1,11 @@
-FROM node:20-alpine AS build
+FROM oven/bun:1-alpine AS build
 WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 COPY tsconfig.json vite.config.ts index.html ./
 COPY public ./public
 COPY src ./src
-RUN npm run build
+RUN bun run build
 
 FROM nginx:1.27-alpine
 COPY --from=build /app/dist /usr/share/nginx/html

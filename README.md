@@ -61,7 +61,7 @@ SpaceTodo consists of three main components:
                  ┌──────────┴──────────┐
                  ▼                     ▼
         ┌─────────────────┐   ┌─────────────────┐
-        │ Node.js Backend │   │   PostgreSQL    │
+        │  Bun Backend    │   │   PostgreSQL    │
         │Express/Sequelize│──▶│ Data + Sessions │
         │     OIDC        │   └─────────────────┘
         └────────┬────────┘
@@ -76,7 +76,7 @@ SpaceTodo consists of three main components:
 ### Technology Stack
 
 * **Frontend:** React + Vite
-* **Backend:** Node.js + TypeScript + Express
+* **Backend:** Bun + TypeScript + Express
 * **Database:** PostgreSQL
 * **ORM:** Sequelize
 * **Authentication:** OpenID Connect via `openid-client`
@@ -281,14 +281,14 @@ A PostgreSQL backup can be created with `pg_dump` against the database container
 
 ## 💻 Local Development
 
-Docker is recommended for running the complete application, but the frontend and backend can also be developed separately.
+Docker is recommended for running the complete application. For local development, install [Bun](https://bun.sh/) and run the frontend and backend separately.
 
 ### Backend
 
 ```bash
 cd backend
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 The backend expects a running PostgreSQL instance configured through `DATABASE_URL`.
@@ -299,8 +299,8 @@ In a second terminal:
 
 ```bash
 cd frontend
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 The development frontend runs on:
@@ -316,7 +316,7 @@ and proxies `/api` and `/auth` to the backend on port `4000`.
 ```text
 .
 ├── frontend/              # React + Vite application
-├── backend/               # Node.js + TypeScript API
+├── backend/               # Bun + TypeScript API
 │   └── src/               # Backend source code
 ├── db_data/               # PostgreSQL data volume
 ├── docker-compose.yml

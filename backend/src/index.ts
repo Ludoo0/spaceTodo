@@ -6,13 +6,13 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import pg from "pg";
 
-import { sequelize } from "./db.js";
-import { apiLimiter, authLimiter } from "./security/rateLimit.js";
-import { doubleCsrfProtection, generateCsrfToken } from "./security/csrf.js";
-import authRoutes from "./routes/auth.js";
-import spaceRoutes from "./routes/spaces.js";
-import todoRoutes from "./routes/todos.js";
-import noteRoutes from "./routes/notes.js";
+import { sequelize } from "@/db";
+import { apiLimiter, authLimiter } from "@/security/rateLimit";
+import { doubleCsrfProtection, generateCsrfToken } from "@/security/csrf";
+import authRoutes from "@/routes/auth";
+import spaceRoutes from "@/routes/spaces";
+import todoRoutes from "@/routes/todos";
+import noteRoutes from "@/routes/notes";
 
 const app = express();
 const PgSession = connectPgSimple(session);

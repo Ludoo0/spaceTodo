@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import { api } from "./api";
-import type { User } from "./types";
-import Sidebar from "./components/Sidebar";
-import Home from "./pages/Home";
-import SpacePage from "./pages/SpacePage";
+import { api } from "@/api";
+import type { User } from "@/types";
+import Sidebar from "@/components/Sidebar";
+import Home from "@/pages/Home";
+import SpacePage from "@/pages/SpacePage";
 
 export default function App() {
     const [user, setUser] = useState<User | null | undefined>(undefined);

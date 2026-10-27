@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { api } from "../api";
-import type { Todo } from "../types";
-import TodoList from "../components/TodoList";
+import { api } from "@/api";
+import type { Todo } from "@/types";
+import TodoList from "@/components/TodoList";
 
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([]);

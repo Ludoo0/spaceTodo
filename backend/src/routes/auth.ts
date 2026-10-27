@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { getOidcClient, generators } from "../auth.js";
-import { User } from "../db.js";
+import { getOidcClient, generators } from "@/auth";
+import { User } from "@/db";
 import { v4 as uuidv4 } from "uuid";
 
 const router = Router();

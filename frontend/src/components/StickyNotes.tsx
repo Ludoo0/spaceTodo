@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import type { Note } from "../types";
+import { useEffect, useRef, useState } from "react";
+import type { Note } from "@/types";
 
 const COLORS = ["#F2C14E", "#E8836B", "#8FAE8B", "#7FA8C9", "#B49CD1"];
 const FREE_BOARD_WIDTH = 1000;
@@ -23,15 +23,28 @@ function autoGrow(el: HTMLTextAreaElement | null) {
 export default function StickyNotes({ notes, layout, onLayoutChange, onAdd, onChange, onRemove, onDragEnd }: Props) {
   const boardRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState<string | null>(null);
+
+  // Mirrors the latest `notes` prop so the window-level listeners (registered
+  // once per drag, see below) always read fresh note data instead of a
+  // stale closure from whichever render happened to be active when the
+  // drag started.
+  const notesRef = useRef(notes);
+  useEffect(() => {
+    notesRef.current = notes;
+  }, [notes]);
+
+  // Offset between the pointer and the note's top-left corner at drag start.
+  // Kept in a ref (not state) so it never triggers a re-render and is always
+  // read fresh inside the window listeners below.
   const dragOffset = useRef({ x: 0, y: 0 });
 
   function startDrag(e: React.PointerEvent, note: Note) {
     const board = boardRef.current;
     if (!board) return;
+    e.preventDefault();
     const rect = board.getBoundingClientRect();
     dragOffset.current = { x: e.clientX - rect.left - note.x, y: e.clientY - rect.top - note.y };
     setDragging(note.id);
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   }
 
   function onDrag(e: React.PointerEvent, note: Note) {
@@ -43,6 +56,42 @@ export default function StickyNotes({ notes, layout, onLayoutChange, onAdd, onCh
     const y = Math.max(0, e.clientY - rect.top - dragOffset.current.y);
     onChange(note, { x, y });
   }
+
+  // Attaching the move/up listeners to `window` (rather than relying on
+  // per-element setPointerCapture, which can get out of sync across fast
+  // re-renders) is what makes dragging fully free in every direction -
+  // including up past wherever the note happened to be created.
+  useEffect(() => {
+    if (!dragging) return;
+
+    function handleMove(e: PointerEvent) {
+      const board = boardRef.current;
+      if (!board) return;
+      const note = notesRef.current.find((n) => n.id === dragging);
+      if (!note) return;
+
+      const rect = board.getBoundingClientRect();
+      const x = Math.max(0, Math.min(rect.width - 200, e.clientX - rect.left - dragOffset.current.x));
+      const y = Math.max(0, e.clientY - rect.top - dragOffset.current.y);
+      onChange(note, { x, y });
+    }
+
+    function handleUp() {
+      const note = notesRef.current.find((n) => n.id === dragging);
+      setDragging(null);
+      if (note) onDragEnd?.(note);
+    }
+
+    window.addEventListener("pointermove", handleMove);
+    window.addEventListener("pointerup", handleUp);
+    window.addEventListener("pointercancel", handleUp);
+    return () => {
+      window.removeEventListener("pointermove", handleMove);
+      window.removeEventListener("pointerup", handleUp);
+      window.removeEventListener("pointercancel", handleUp);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dragging]);
 
   return (
       <div className="corkboard-wrap">

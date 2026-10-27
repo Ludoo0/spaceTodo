@@ -1,5 +1,5 @@
 import React from "react";
-import { debounceManager } from "./debounceManager";
+import { debounceManager } from "@/utils/debounceManager";
 
 /**
  * Creates a debounced version of a function that groups multiple rapid calls

@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { Space } from "../db.js";
-import { requireAuth } from "../middleware/requireAuth.js";
+import { Space } from "@/db";
+import { requireAuth } from "@/middleware/requireAuth";
 import { v4 as uuidv4 } from "uuid";
 
 const router = Router();
