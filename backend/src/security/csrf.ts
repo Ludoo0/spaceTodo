@@ -8,14 +8,15 @@ import { doubleCsrf } from "csrf-csrf";
 // Flow: the frontend fetches a token once via GET /auth/csrf-token and sends
 // it back as the "x-csrf-token" header on every POST/PATCH/DELETE request.
 export const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
-	getSecret: () => process.env.SESSION_SECRET || "change-me-in-production",
-	getSessionIdentifier: (req) => req.session.id,
-	cookieName: "spacetodo.csrf",
-	cookieOptions: {
-		httpOnly: true,
-		sameSite: "lax",
-		secure: process.env.COOKIE_SECURE === "true",
-		path: "/",
-	},
-	getCsrfTokenFromRequest: (req) => req.headers["x-csrf-token"] as string | undefined,
+  getSecret: () => process.env.SESSION_SECRET || "change-me-in-production",
+  getSessionIdentifier: (req) => req.session.id,
+  cookieName: "spacetodo.csrf",
+  cookieOptions: {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.COOKIE_SECURE === "true",
+    path: "/",
+  },
+  getCsrfTokenFromRequest: (req) =>
+    req.headers["x-csrf-token"] as string | undefined,
 });

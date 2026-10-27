@@ -1,18 +1,18 @@
 import "dotenv/config";
+import connectPgSimple from "connect-pg-simple";
+import cookieParser from "cookie-parser";
+import cors from "cors";
 import express from "express";
 import session from "express-session";
-import connectPgSimple from "connect-pg-simple";
-import cors from "cors";
-import cookieParser from "cookie-parser";
 import pg from "pg";
 
 import { sequelize } from "@/db";
-import { apiLimiter, authLimiter } from "@/security/rateLimit";
-import { doubleCsrfProtection, generateCsrfToken } from "@/security/csrf";
 import authRoutes from "@/routes/auth";
+import noteRoutes from "@/routes/notes";
 import spaceRoutes from "@/routes/spaces";
 import todoRoutes from "@/routes/todos";
-import noteRoutes from "@/routes/notes";
+import { doubleCsrfProtection, generateCsrfToken } from "@/security/csrf";
+import { apiLimiter, authLimiter } from "@/security/rateLimit";
 
 const app = express();
 const PgSession = connectPgSimple(session);
@@ -27,30 +27,34 @@ const allowedOrigins = (process.env.FRONTEND_URL || "")
   .filter(Boolean);
 
 app.use(
-    cors({
-        origin: (origin, callback) => {
+  cors({
+    origin: (origin, callback) => {
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) return callback(null, true);
       return callback(null, false);
     },
-        credentials: true,
-    })
+    credentials: true,
+  }),
 );
 
 app.use(
-    session({
-        store: new PgSession({ pool: pgPool, tableName: "session", createTableIfMissing: true }),
-        name: "spacetodo.sid",
-        secret: process.env.SESSION_SECRET || "change-me-in-production",
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            httpOnly: true,
-            sameSite: "lax",
-            secure: process.env.COOKIE_SECURE === "true",
-            maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
-        },
-    })
+  session({
+    store: new PgSession({
+      pool: pgPool,
+      tableName: "session",
+      createTableIfMissing: true,
+    }),
+    name: "spacetodo.sid",
+    secret: process.env.SESSION_SECRET || "change-me-in-production",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.COOKIE_SECURE === "true",
+      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+    },
+  }),
 );
 
 // cookie-parser must come after express-session (session parses its own cookie)
@@ -63,7 +67,7 @@ app.use(doubleCsrfProtection);
 // The frontend calls this once (after confirming it's logged in) to obtain a
 // token, then attaches it as the "x-csrf-token" header on every mutation.
 app.get("/auth/csrf-token", (req, res) => {
-    res.json({ csrfToken: generateCsrfToken(req, res) });
+  res.json({ csrfToken: generateCsrfToken(req, res) });
 });
 
 app.use("/api", apiLimiter);
@@ -77,27 +81,36 @@ app.use("/api/notes", noteRoutes);
 app.get("/healthz", (_req, res) => res.json({ ok: true }));
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+app.use(
+  (
+    err: any,
+    _req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction,
+  ) => {
     if (err?.code === "EBADCSRFTOKEN") {
-        return res.status(403).json({ error: "Ungültiges CSRF-Token. Bitte Seite neu laden." });
+      return res
+        .status(403)
+        .json({ error: "Ungültiges CSRF-Token. Bitte Seite neu laden." });
     }
     console.error(err);
     res.status(500).json({ error: err?.message || "Interner Serverfehler" });
-});
+  },
+);
 
 const port = Number(process.env.PORT) || 4000;
 
 (async () => {
-    try {
-        // Sync database
-        await sequelize.sync({ alter: true });
-        console.log("Datenbank synchronisiert");
+  try {
+    // Sync database
+    await sequelize.sync({ alter: true });
+    console.log("Datenbank synchronisiert");
 
-        app.listen(port, () => {
-            console.log(`spacetodo backend läuft auf Port ${port}`);
-        });
-    } catch (error) {
-        console.error("Fehler beim Starten des Servers:", error);
-        process.exit(1);
-    }
+    app.listen(port, () => {
+      console.log(`spacetodo backend läuft auf Port ${port}`);
+    });
+  } catch (error) {
+    console.error("Fehler beim Starten des Servers:", error);
+    process.exit(1);
+  }
 })();

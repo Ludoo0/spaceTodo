@@ -1,4 +1,4 @@
-import { Sequelize, DataTypes, Model } from "sequelize";
+import { DataTypes, Model, Sequelize } from "sequelize";
 
 export const sequelize = new Sequelize(process.env.DATABASE_URL!, {
   dialect: "postgres",
@@ -46,7 +46,7 @@ User.init(
     modelName: "User",
     tableName: "User",
     timestamps: false,
-  }
+  },
 );
 
 // Space Model
@@ -116,7 +116,7 @@ Space.init(
     modelName: "Space",
     tableName: "Space",
     timestamps: false,
-  }
+  },
 );
 
 // Todo Model
@@ -184,7 +184,7 @@ Todo.init(
     modelName: "Todo",
     tableName: "Todo",
     timestamps: false,
-  }
+  },
 );
 
 // Note Model
@@ -258,7 +258,7 @@ Note.init(
     modelName: "Note",
     tableName: "Note",
     timestamps: false,
-  }
+  },
 );
 
 // Define Relationships

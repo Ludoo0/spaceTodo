@@ -8,7 +8,9 @@
     "build": "bun build ./src/index.ts --target=bun --outdir=dist --external pg-native --minify",
     "start": "bun dist/index.js",
     "dev": "bun --watch src/index.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check ./src",
+    "lint:fix": "biome check ./src --fix"
   },
   "dependencies": {
     "connect-pg-simple": "^10.0.0",
@@ -23,9 +25,11 @@
     "pg": "^8.23.1",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.8",
-    "uuid": "^14.0.3"
+    "uuid": "^14.0.3",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.6.3",
     "@types/connect-pg-simple": "^7.0.3",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",

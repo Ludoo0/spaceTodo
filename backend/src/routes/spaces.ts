@@ -1,7 +1,12 @@
 import { Router } from "express";
+import { v4 as uuidv4 } from "uuid";
 import { Space } from "@/db";
 import { requireAuth } from "@/middleware/requireAuth";
-import { v4 as uuidv4 } from "uuid";
+import {
+  createSpaceSchema,
+  returnValidationError,
+  updateSpaceSchema,
+} from "@/validation/schemas.ts";
 
 const router = Router();
 router.use(requireAuth);
@@ -16,15 +21,17 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  const { name, color, icon } = req.body as { name?: string; color?: string; icon?: string };
-  if (!name || !name.trim()) return res.status(400).json({ error: "name ist erforderlich" });
+  const parsed = createSpaceSchema.safeParse(req.body);
+  if (!parsed.success) return returnValidationError(res, parsed.error);
+
+  const { name, color, icon } = parsed.data;
 
   const count = await Space.count({ where: { ownerId: req.session.userId! } });
   const space = await Space.create({
     id: uuidv4(),
-    name: name.trim(),
-    color: color || "#3E7C6B",
-    icon: icon || "folder",
+    name,
+    color,
+    icon,
     position: count,
     ownerId: req.session.userId!,
   });
@@ -39,13 +46,10 @@ router.patch("/:id", async (req, res) => {
   const space = await loadOwnedSpace(req.session.userId!, req.params.id);
   if (!space) return res.status(404).json({ error: "Space nicht gefunden" });
 
-  const { name, color, icon, position, noteLayout } = req.body as {
-    name?: string;
-    color?: string;
-    icon?: string;
-    position?: number;
-    noteLayout?: string;
-  };
+  const parsed = updateSpaceSchema.safeParse(req.body);
+  if (!parsed.success) return returnValidationError(res, parsed.error);
+  const { name, color, icon, position, noteLayout } = parsed.data;
+
   const updated = await space.update({
     ...(name !== undefined ? { name } : {}),
     ...(color !== undefined ? { color } : {}),

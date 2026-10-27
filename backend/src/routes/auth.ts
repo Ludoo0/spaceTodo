@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { getOidcClient, generators } from "@/auth";
-import { User } from "@/db";
 import { v4 as uuidv4 } from "uuid";
+import { generators, getOidcClient } from "@/auth";
+import { User } from "@/db";
 
 const router = Router();
 
@@ -34,15 +34,21 @@ router.get("/callback", async (req, res, next) => {
     const client = await getOidcClient();
     const pending = req.session.oidc;
     if (!pending) {
-      return res.status(400).send("Login-Session abgelaufen. Bitte erneut einloggen.");
+      return res
+        .status(400)
+        .send("Login-Session abgelaufen. Bitte erneut einloggen.");
     }
 
     const params = client.callbackParams(req);
-    const tokenSet = await client.callback(process.env.OIDC_REDIRECT_URI!, params, {
-      code_verifier: pending.code_verifier,
-      state: pending.state,
-      nonce: pending.nonce,
-    });
+    const tokenSet = await client.callback(
+      process.env.OIDC_REDIRECT_URI!,
+      params,
+      {
+        code_verifier: pending.code_verifier,
+        state: pending.state,
+        nonce: pending.nonce,
+      },
+    );
 
     const userinfo = await client.userinfo(tokenSet);
 
@@ -52,13 +58,17 @@ router.get("/callback", async (req, res, next) => {
         id: uuidv4(),
         oidcSub: userinfo.sub as string,
         email: userinfo.email as string | undefined,
-        name: ((userinfo.name as string) ?? userinfo.preferred_username) as string | undefined,
+        name: ((userinfo.name as string) ?? userinfo.preferred_username) as
+          | string
+          | undefined,
       },
     });
 
     await user.update({
       email: userinfo.email as string | undefined,
-      name: ((userinfo.name as string) ?? userinfo.preferred_username) as string | undefined,
+      name: ((userinfo.name as string) ?? userinfo.preferred_username) as
+        | string
+        | undefined,
     });
 
     delete req.session.oidc;
@@ -78,7 +88,8 @@ router.post("/logout", (req, res) => {
 });
 
 router.get("/me", async (req, res) => {
-  if (!req.session.userId) return res.status(401).json({ error: "unauthenticated" });
+  if (!req.session.userId)
+    return res.status(401).json({ error: "unauthenticated" });
   const user = await User.findByPk(req.session.userId);
   if (!user) return res.status(401).json({ error: "unauthenticated" });
   res.json({ id: user.id, email: user.email, name: user.name });

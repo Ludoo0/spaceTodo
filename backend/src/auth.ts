@@ -1,4 +1,4 @@
-import { Issuer, generators, type Client } from "openid-client";
+import { type Client, generators, Issuer } from "openid-client";
 
 let client: Client | null = null;
 
@@ -12,7 +12,7 @@ export async function getOidcClient(): Promise<Client> {
 
   if (!issuerUrl || !clientId || !redirectUri) {
     throw new Error(
-      "OIDC ist nicht konfiguriert. Bitte OIDC_ISSUER_URL, OIDC_CLIENT_ID und OIDC_REDIRECT_URI setzen."
+      "OIDC ist nicht konfiguriert. Bitte OIDC_ISSUER_URL, OIDC_CLIENT_ID und OIDC_REDIRECT_URI setzen.",
     );
   }
 

@@ -1,7 +1,8 @@
 import { Router } from "express";
+import { v4 as uuidv4 } from "uuid";
 import { Note, Space } from "@/db";
 import { requireAuth } from "@/middleware/requireAuth";
-import { v4 as uuidv4 } from "uuid";
+import { noteSchema, returnValidationError } from "@/validation/schemas.ts";
 
 const router = Router();
 router.use(requireAuth);
@@ -13,16 +14,21 @@ async function assertSpaceOwnership(userId: string, spaceId: string) {
 async function assertNoteOwnership(userId: string, noteId: string) {
   return Note.findOne({
     where: { id: noteId },
-    include: [{
-      association: "space",
-      where: { ownerId: userId },
-      required: true,
-    }],
+    include: [
+      {
+        association: "space",
+        where: { ownerId: userId },
+        required: true,
+      },
+    ],
   });
 }
 
 router.get("/space/:spaceId", async (req, res) => {
-  const space = await assertSpaceOwnership(req.session.userId!, req.params.spaceId);
+  const space = await assertSpaceOwnership(
+    req.session.userId!,
+    req.params.spaceId,
+  );
   if (!space) return res.status(404).json({ error: "Space nicht gefunden" });
 
   const notes = await Note.findAll({
@@ -33,24 +39,24 @@ router.get("/space/:spaceId", async (req, res) => {
 });
 
 router.post("/space/:spaceId", async (req, res) => {
-  const space = await assertSpaceOwnership(req.session.userId!, req.params.spaceId);
+  const space = await assertSpaceOwnership(
+    req.session.userId!,
+    req.params.spaceId,
+  );
   if (!space) return res.status(404).json({ error: "Space nicht gefunden" });
 
-  const { content, color, x, y, rotation } = req.body as {
-    content?: string;
-    color?: string;
-    x?: number;
-    y?: number;
-    rotation?: number;
-  };
+  const parsed = noteSchema.safeParse(req.body);
+  if (!parsed.success) return returnValidationError(res, parsed.error);
+
+  const { content, color, x, y, rotation } = parsed.data;
 
   const note = await Note.create({
     id: uuidv4(),
-    content: content || "",
-    color: color || "#D9A441",
-    x: x ?? Math.round(Math.random() * 650),
-    y: y ?? Math.round(Math.random() * 240),
-    rotation: rotation ?? Math.round(Math.random() * 6 - 3),
+    content,
+    color,
+    x,
+    y,
+    rotation,
     spaceId: space.id,
   });
   res.status(201).json(note);
@@ -60,13 +66,10 @@ router.patch("/:id", async (req, res) => {
   const note = await assertNoteOwnership(req.session.userId!, req.params.id);
   if (!note) return res.status(404).json({ error: "Notiz nicht gefunden" });
 
-  const { content, color, x, y, rotation } = req.body as {
-    content?: string;
-    color?: string;
-    x?: number;
-    y?: number;
-    rotation?: number;
-  };
+  const parsed = noteSchema.partial().safeParse(req.body);
+  if (!parsed.success) return returnValidationError(res, parsed.error);
+
+  const { content, color, x, y, rotation } = parsed.data;
 
   const updated = await note.update({
     ...(content !== undefined ? { content } : {}),
