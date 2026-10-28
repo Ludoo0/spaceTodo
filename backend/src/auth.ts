@@ -1,20 +1,15 @@
 import { type Client, generators, Issuer } from "openid-client";
+import { env } from "@/config/env";
 
 let client: Client | null = null;
 
 export async function getOidcClient(): Promise<Client> {
   if (client) return client;
 
-  const issuerUrl = process.env.OIDC_ISSUER_URL;
-  const clientId = process.env.OIDC_CLIENT_ID;
-  const clientSecret = process.env.OIDC_CLIENT_SECRET;
-  const redirectUri = process.env.OIDC_REDIRECT_URI;
-
-  if (!issuerUrl || !clientId || !redirectUri) {
-    throw new Error(
-      "OIDC ist nicht konfiguriert. Bitte OIDC_ISSUER_URL, OIDC_CLIENT_ID und OIDC_REDIRECT_URI setzen.",
-    );
-  }
+  const issuerUrl = env.OIDC_ISSUER_URL;
+  const clientId = env.OIDC_CLIENT_ID;
+  const clientSecret = env.OIDC_CLIENT_SECRET;
+  const redirectUri = env.OIDC_REDIRECT_URI;
 
   const issuer = await Issuer.discover(issuerUrl);
   client = new issuer.Client({

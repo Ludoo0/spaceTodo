@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { v4 as uuidv4 } from "uuid";
-import { Note, Space } from "@/db";
+import { Note, Space } from "@/config/db.ts";
 import { requireAuth } from "@/middleware/requireAuth";
 import { noteSchema, returnValidationError } from "@/validation/schemas.ts";
 
@@ -25,10 +25,10 @@ async function assertNoteOwnership(userId: string, noteId: string) {
 }
 
 router.get("/space/:spaceId", async (req, res) => {
-  const space = await assertSpaceOwnership(
-    req.session.userId!,
-    req.params.spaceId,
-  );
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+
+  const space = await assertSpaceOwnership(userId, req.params.spaceId);
   if (!space) return res.status(404).json({ error: "Space nicht gefunden" });
 
   const notes = await Note.findAll({
@@ -39,10 +39,10 @@ router.get("/space/:spaceId", async (req, res) => {
 });
 
 router.post("/space/:spaceId", async (req, res) => {
-  const space = await assertSpaceOwnership(
-    req.session.userId!,
-    req.params.spaceId,
-  );
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+
+  const space = await assertSpaceOwnership(userId, req.params.spaceId);
   if (!space) return res.status(404).json({ error: "Space nicht gefunden" });
 
   const parsed = noteSchema.safeParse(req.body);
@@ -63,7 +63,10 @@ router.post("/space/:spaceId", async (req, res) => {
 });
 
 router.patch("/:id", async (req, res) => {
-  const note = await assertNoteOwnership(req.session.userId!, req.params.id);
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+
+  const note = await assertNoteOwnership(userId, req.params.id);
   if (!note) return res.status(404).json({ error: "Notiz nicht gefunden" });
 
   const parsed = noteSchema.partial().safeParse(req.body);
@@ -82,7 +85,10 @@ router.patch("/:id", async (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
-  const note = await assertNoteOwnership(req.session.userId!, req.params.id);
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+
+  const note = await assertNoteOwnership(userId, req.params.id);
   if (!note) return res.status(404).json({ error: "Notiz nicht gefunden" });
   await note.destroy();
   res.status(204).end();

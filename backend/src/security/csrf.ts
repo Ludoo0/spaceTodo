@@ -1,4 +1,5 @@
 import { doubleCsrf } from "csrf-csrf";
+import { env } from "@/config/env";
 
 // Double-submit-cookie CSRF protection. The session cookie already uses
 // SameSite=Lax, which blocks the classic cross-site form/fetch CSRF vector,
@@ -8,13 +9,13 @@ import { doubleCsrf } from "csrf-csrf";
 // Flow: the frontend fetches a token once via GET /auth/csrf-token and sends
 // it back as the "x-csrf-token" header on every POST/PATCH/DELETE request.
 export const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
-  getSecret: () => process.env.SESSION_SECRET || "change-me-in-production",
+  getSecret: () => env.SESSION_SECRET,
   getSessionIdentifier: (req) => req.session.id,
   cookieName: "spacetodo.csrf",
   cookieOptions: {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.COOKIE_SECURE === "true",
+    secure: env.COOKIE_SECURE,
     path: "/",
   },
   getCsrfTokenFromRequest: (req) =>

@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { generators, getOidcClient } from "@/auth";
-import { User } from "@/db";
+import { User } from "@/config/db";
+import { env } from "@/config/env";
 
 const router = Router();
 
@@ -16,7 +17,7 @@ router.get("/login", async (req, res, next) => {
     req.session.oidc = { code_verifier, state, nonce };
 
     const url = client.authorizationUrl({
-      scope: process.env.OIDC_SCOPES || "openid profile email",
+      scope: env.OIDC_SCOPES,
       state,
       nonce,
       code_challenge,
@@ -40,15 +41,11 @@ router.get("/callback", async (req, res, next) => {
     }
 
     const params = client.callbackParams(req);
-    const tokenSet = await client.callback(
-      process.env.OIDC_REDIRECT_URI!,
-      params,
-      {
-        code_verifier: pending.code_verifier,
-        state: pending.state,
-        nonce: pending.nonce,
-      },
-    );
+    const tokenSet = await client.callback(env.OIDC_REDIRECT_URI, params, {
+      code_verifier: pending.code_verifier,
+      state: pending.state,
+      nonce: pending.nonce,
+    });
 
     const userinfo = await client.userinfo(tokenSet);
 
@@ -74,7 +71,7 @@ router.get("/callback", async (req, res, next) => {
     delete req.session.oidc;
     req.session.userId = user.id;
 
-    res.redirect(process.env.FRONTEND_URL || "/");
+    res.redirect(env.FRONTEND_URL || "/");
   } catch (err) {
     next(err);
   }

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { v4 as uuidv4 } from "uuid";
-import { Space } from "@/db";
+import { Space } from "@/config/db.ts";
 import { requireAuth } from "@/middleware/requireAuth";
 import {
   createSpaceSchema,
@@ -13,27 +13,33 @@ router.use(requireAuth);
 
 // List all spaces of the current user
 router.get("/", async (req, res) => {
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+
   const spaces = await Space.findAll({
-    where: { ownerId: req.session.userId! },
+    where: { ownerId: userId },
     order: [["position", "ASC"]],
   });
   res.json(spaces);
 });
 
 router.post("/", async (req, res) => {
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+
   const parsed = createSpaceSchema.safeParse(req.body);
   if (!parsed.success) return returnValidationError(res, parsed.error);
 
   const { name, color, icon } = parsed.data;
 
-  const count = await Space.count({ where: { ownerId: req.session.userId! } });
+  const count = await Space.count({ where: { ownerId: userId } });
   const space = await Space.create({
     id: uuidv4(),
     name,
     color,
     icon,
     position: count,
-    ownerId: req.session.userId!,
+    ownerId: userId,
   });
   res.status(201).json(space);
 });
@@ -43,7 +49,10 @@ async function loadOwnedSpace(userId: string, spaceId: string) {
 }
 
 router.patch("/:id", async (req, res) => {
-  const space = await loadOwnedSpace(req.session.userId!, req.params.id);
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+
+  const space = await loadOwnedSpace(userId, req.params.id);
   if (!space) return res.status(404).json({ error: "Space nicht gefunden" });
 
   const parsed = updateSpaceSchema.safeParse(req.body);
@@ -61,7 +70,10 @@ router.patch("/:id", async (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
-  const space = await loadOwnedSpace(req.session.userId!, req.params.id);
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+
+  const space = await loadOwnedSpace(userId, req.params.id);
   if (!space) return res.status(404).json({ error: "Space nicht gefunden" });
   await space.destroy();
   res.status(204).end();

@@ -6,7 +6,8 @@ import express from "express";
 import session from "express-session";
 import pg from "pg";
 
-import { sequelize } from "@/db";
+import { sequelize } from "@/config/db.ts";
+import { env } from "@/config/env";
 import authRoutes from "@/routes/auth";
 import noteRoutes from "@/routes/notes";
 import spaceRoutes from "@/routes/spaces";
@@ -17,11 +18,11 @@ import { apiLimiter, authLimiter } from "@/security/rateLimit";
 const app = express();
 const PgSession = connectPgSimple(session);
 
-const pgPool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+const pgPool = new pg.Pool({ connectionString: env.DATABASE_URL });
 
 app.set("trust proxy", 1);
 app.use(express.json());
-const allowedOrigins = (process.env.FRONTEND_URL || "")
+const allowedOrigins = (env.FRONTEND_URL || "")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
@@ -45,13 +46,13 @@ app.use(
       createTableIfMissing: true,
     }),
     name: "spacetodo.sid",
-    secret: process.env.SESSION_SECRET || "change-me-in-production",
+    secret: env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.COOKIE_SECURE === "true",
+      secure: env.COOKIE_SECURE,
       maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     },
   }),
@@ -83,22 +84,28 @@ app.get("/healthz", (_req, res) => res.json({ ok: true }));
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use(
   (
-    err: any,
+    err: unknown,
     _req: express.Request,
     res: express.Response,
     _next: express.NextFunction,
   ) => {
-    if (err?.code === "EBADCSRFTOKEN") {
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "code" in err &&
+      err.code === "EBADCSRFTOKEN"
+    ) {
       return res
         .status(403)
         .json({ error: "Ungültiges CSRF-Token. Bitte Seite neu laden." });
     }
     console.error(err);
-    res.status(500).json({ error: err?.message || "Interner Serverfehler" });
+    const message = err instanceof Error ? err.message : undefined;
+    res.status(500).json({ error: message || "Interner Serverfehler" });
   },
 );
 
-const port = Number(process.env.PORT) || 4000;
+const port = env.PORT;
 
 (async () => {
   try {

@@ -7,7 +7,7 @@ services:
       - "127.0.0.1:5432:5432"
     environment:
       POSTGRES_USER: spacetodo
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-spacetodo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORT must be set`}
       POSTGRES_DB: spacetodo
     volumes:
       - ./db_data:/var/lib/postgresql/data
@@ -25,8 +25,8 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://spacetodo:${POSTGRES_PASSWORD:-spacetodo}@db:5432/spacetodo
-      SESSION_SECRET: ${SESSION_SECRET}
+      DATABASE_URL: postgresql://spacetodo:${POSTGRES_PASSWORD:?POSTGRES_PASSWORT must be set}@db:5432/spacetodo
+      SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET must be set}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       FRONTEND_URL: ${FRONTEND_URL}
       OIDC_ISSUER_URL: ${OIDC_ISSUER_URL}

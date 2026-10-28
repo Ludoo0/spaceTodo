@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { v4 as uuidv4 } from "uuid";
-import { Space, Todo } from "@/db";
+import { Space, Todo } from "@/config/db.ts";
 import { requireAuth } from "@/middleware/requireAuth";
 import {
   createTodoSchema,
@@ -30,6 +30,9 @@ async function assertTodoOwnership(userId: string, todoId: string) {
 
 // Aggregated, prioritized todos across ALL spaces - used on the home page
 router.get("/priority", async (req, res) => {
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+
   const todos = await Todo.findAll({
     where: {
       priority: true,
@@ -38,7 +41,7 @@ router.get("/priority", async (req, res) => {
     include: [
       {
         association: "space",
-        where: { ownerId: req.session.userId! },
+        where: { ownerId: userId },
         attributes: ["id", "name", "color", "icon"],
         required: true,
       },
@@ -52,10 +55,10 @@ router.get("/priority", async (req, res) => {
 });
 
 router.get("/space/:spaceId", async (req, res) => {
-  const space = await assertSpaceOwnership(
-    req.session.userId!,
-    req.params.spaceId,
-  );
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+
+  const space = await assertSpaceOwnership(userId, req.params.spaceId);
   if (!space) return res.status(404).json({ error: "Space nicht gefunden" });
 
   const todos = await Todo.findAll({
@@ -70,10 +73,10 @@ router.get("/space/:spaceId", async (req, res) => {
 });
 
 router.post("/space/:spaceId", async (req, res) => {
-  const space = await assertSpaceOwnership(
-    req.session.userId!,
-    req.params.spaceId,
-  );
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+
+  const space = await assertSpaceOwnership(userId, req.params.spaceId);
   if (!space) return res.status(404).json({ error: "Space nicht gefunden" });
 
   const parsed = createTodoSchema.safeParse(req.body);
@@ -92,7 +95,10 @@ router.post("/space/:spaceId", async (req, res) => {
 });
 
 router.patch("/:id", async (req, res) => {
-  const todo = await assertTodoOwnership(req.session.userId!, req.params.id);
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+
+  const todo = await assertTodoOwnership(userId, req.params.id);
   if (!todo) return res.status(404).json({ error: "Todo nicht gefunden" });
 
   const parsed = updateTodoSchema.partial().safeParse(req.body);
@@ -110,7 +116,10 @@ router.patch("/:id", async (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
-  const todo = await assertTodoOwnership(req.session.userId!, req.params.id);
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: "unauthenticated" });
+
+  const todo = await assertTodoOwnership(userId, req.params.id);
   if (!todo) return res.status(404).json({ error: "Todo nicht gefunden" });
   await todo.destroy();
   res.status(204).end();
