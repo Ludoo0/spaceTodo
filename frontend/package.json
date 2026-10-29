@@ -8,7 +8,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "typecheck": "tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "biome check ./src",
+    "lint:fix": "biome check ./src --fix"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -16,6 +18,7 @@
     "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.6.3",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.7.0",

@@ -10,12 +10,10 @@ export interface PendingOperation {
 
 class DebounceManager {
   private operations = new Map<string, PendingOperation>();
-  private initialized = false;
 
   constructor() {
     if (typeof window !== "undefined") {
       this.setupBeforeUnload();
-      this.initialized = true;
     }
   }
 
@@ -61,4 +59,3 @@ class DebounceManager {
 }
 
 export const debounceManager = new DebounceManager();
-

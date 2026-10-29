@@ -44,12 +44,15 @@ export default function TodoList({
         </form>
       )}
 
-      {todos.length === 0 && <p className="empty-hint">{emptyLabel || "Keine Todos."}</p>}
+      {todos.length === 0 && (
+        <p className="empty-hint">{emptyLabel || "Keine Todos."}</p>
+      )}
 
       <ul className="todo-list">
         {todos.map((t) => (
-          <li key={t.id} className={"todo-row" + (t.done ? " done" : "")}>
+          <li key={t.id} className={`todo-row${t.done ? " done" : ""}`}>
             <button
+              type="button"
               className="todo-check"
               aria-label="erledigt umschalten"
               onClick={() => onToggleDone(t)}
@@ -58,18 +61,29 @@ export default function TodoList({
             </button>
             <span className="todo-title">{t.title}</span>
             {showSpaceTag && t.space && (
-              <span className="todo-space-tag" style={{ ["--space-color" as any]: t.space.color }}>
+              <span
+                className="todo-space-tag"
+                style={
+                  { "--space-color": t.space.color } as React.CSSProperties
+                }
+              >
                 {t.space.name}
               </span>
             )}
             <button
-              className={"todo-star" + (t.priority ? " active" : "")}
+              type="button"
+              className={`todo-star${t.priority ? " active" : ""}`}
               title="Priorität umschalten"
               onClick={() => onTogglePriority(t)}
             >
               ★
             </button>
-            <button className="todo-remove" title="löschen" onClick={() => onRemove(t)}>
+            <button
+              type="button"
+              className="todo-remove"
+              title="löschen"
+              onClick={() => onRemove(t)}
+            >
               ×
             </button>
           </li>

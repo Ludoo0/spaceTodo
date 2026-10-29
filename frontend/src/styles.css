@@ -188,7 +188,6 @@ a {
   background: transparent;
 }
 
-.space-row:hover .nav-item.active,
 .space-row .nav-item.active {
   color: #fff;
 }
@@ -292,6 +291,9 @@ a {
 
 .sidebar-backdrop {
   display: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .sidebar-footer {
@@ -549,7 +551,13 @@ a {
   padding: 2.5rem 1rem;
   color: #b8b2a0;
   border-radius: 4px;
-  background: repeating-linear-gradient(45deg, #322f28, #322f28 2px, #2e2b25 2px, #2e2b25 4px);
+  background: repeating-linear-gradient(
+    45deg,
+    #322f28,
+    #322f28 2px,
+    #2e2b25 2px,
+    #2e2b25 4px
+  );
 }
 
 .corkboard-grid {
@@ -569,7 +577,13 @@ a {
   position: relative;
   min-height: 420px;
   border-radius: 4px;
-  background: repeating-linear-gradient(45deg, #322f28, #322f28 2px, #2e2b25 2px, #2e2b25 4px);
+  background: repeating-linear-gradient(
+    45deg,
+    #322f28,
+    #322f28 2px,
+    #2e2b25 2px,
+    #2e2b25 4px
+  );
 }
 
 .sticky-note-free {
@@ -577,10 +591,6 @@ a {
   width: 190px;
   min-height: 150px;
   padding: 0;
-}
-
-.sticky-note-free .sticky-note-remove {
-  align-self: auto;
 }
 
 .sticky-note-handle {
@@ -616,6 +626,10 @@ a {
   font-size: 1.05rem;
   padding: 0 0.35rem;
   line-height: 1.2;
+}
+
+.sticky-note-free .sticky-note-remove {
+  align-self: auto;
 }
 
 .sticky-note textarea {

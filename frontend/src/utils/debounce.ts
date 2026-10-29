@@ -8,15 +8,15 @@ import { debounceManager } from "@/utils/debounceManager";
  * Supports manual flushing for immediate execution and cleanup.
  */
 
-interface DebouncedFunction<T extends (...args: any[]) => any> {
+interface DebouncedFunction<T extends (...args: never[]) => unknown> {
   (...args: Parameters<T>): void;
   flush: () => void;
   cancel: () => void;
 }
 
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: never[]) => unknown>(
   func: T,
-  delayMs: number
+  delayMs: number,
 ): DebouncedFunction<T> {
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
   let lastArgs: Parameters<T> | null = null;
@@ -69,11 +69,11 @@ export function debounce<T extends (...args: any[]) => any>(
 export function useDebounce<T>(
   asyncFn: (value: T) => Promise<void>,
   delayMs: number = 500,
-  operationId?: string
+  operationId?: string,
 ) {
   const debouncedAsync = React.useMemo(
     () => debounce(asyncFn, delayMs),
-    [asyncFn, delayMs]
+    [asyncFn, delayMs],
   );
 
   const opId = operationId || `debounce-${Math.random()}`;
@@ -94,7 +94,3 @@ export function useDebounce<T>(
 
   return debouncedAsync;
 }
-
-
-
-
